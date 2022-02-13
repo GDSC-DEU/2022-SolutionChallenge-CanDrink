@@ -2,12 +2,15 @@ import 'package:camera/camera.dart';
 import 'package:candrink/screens/camera_screen.dart';
 import 'package:candrink/services/permission_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 List<CameraDescription> cameras = [];
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  getPermission();
+  if (!await getPermission()) {
+    SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+  }
   cameras = await availableCameras();
   runApp(const MyApp());
 }
