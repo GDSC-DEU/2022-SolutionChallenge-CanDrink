@@ -36,6 +36,7 @@ class _CameraScreenState extends State<CameraScreen> {
                   cameraImage = image;
                   recognitionsList =
                       await runModel(cameraImage, recognitionsList);
+                  filterRecognitions();
                   setState(() {
                     cameraImage;
                   });
@@ -48,6 +49,17 @@ class _CameraScreenState extends State<CameraScreen> {
         );
       },
     );
+  }
+
+  void filterRecognitions() {
+    var newRecognitionsList = [];
+    for (var result in recognitionsList) {
+      if (result['detectedClass'] == 'can' ||
+          result['detectedClass'] == 'bottle') {
+        newRecognitionsList.add(result);
+      }
+    }
+    recognitionsList = newRecognitionsList;
   }
 
   @override
