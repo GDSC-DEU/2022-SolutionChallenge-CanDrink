@@ -1,0 +1,16 @@
+{
+  "[python]": {
+    "editor.tabSize": 4,
+    // black does not support the "Format Select" command
+    "editor.formatOnPaste": false,
+    "editor.formatOnSave": true,
+    "editor.formatOnSaveMode": "file",
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": true
+    },
+    "editor.defaultFormatter": "ms-python.python"
+  },
+
+  "python.formatting.provider": "black",
+  "python.sortImports.args": ["--profile=black"]
+}
