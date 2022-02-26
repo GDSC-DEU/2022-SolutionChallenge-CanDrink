@@ -1,3 +1,4 @@
+import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -48,7 +49,21 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final assetsAudioPlayer = AssetsAudioPlayer();
+
   int _counter = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    playBeep();
+  }
+
+  void playBeep() {
+    assetsAudioPlayer.open(
+      Audio("assets/sound/beep.mp3"),
+    );
+  }
 
   void _incrementCounter() {
     setState(() {
