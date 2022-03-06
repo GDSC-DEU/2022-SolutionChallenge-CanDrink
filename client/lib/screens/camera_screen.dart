@@ -1,9 +1,11 @@
 import 'package:camera/camera.dart';
+import 'package:candrink/services/ml_kit/barcode_scanner.dart';
 import 'package:candrink/services/tflite/image_classification/classifier.dart';
 import 'package:candrink/services/tflite/image_classification/classifier_quant.dart';
 import 'package:candrink/services/tflite/object_detection/tflite_service.dart';
 import 'package:candrink/utils/image_convert.dart';
 import 'package:flutter/material.dart';
+import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:image/image.dart' as img;
 import 'package:tflite/tflite.dart';
 import 'package:tflite_flutter_helper/tflite_flutter_helper.dart';
@@ -40,8 +42,21 @@ class _CameraScreenState extends State<CameraScreen> {
                 if (available) {
                   available = false;
                   cameraImage = image;
-                  recognitionsList =
-                      await runModel(cameraImage, recognitionsList);
+                  var barcodes = await scanBarcode(cameraImage);
+                  if (barcodes.isEmpty) {
+                    recognitionsList =
+                        await runModel(cameraImage, recognitionsList);
+                  } else {
+                    for (Barcode barcode in barcodes) {
+                      final BarcodeType type = barcode.type;
+                      final Rect? boundingBox = barcode.value.boundingBox;
+                      final String? displayValue = barcode.value.displayValue;
+                      final String? rawValue = barcode.value.rawValue;
+
+                      print(
+                          "type: $type, displayValue: $displayValue, rawValue: $rawValue");
+                    }
+                  }
                   filterRecognitions();
                   setState(() {
                     cameraImage;
@@ -66,7 +81,6 @@ class _CameraScreenState extends State<CameraScreen> {
       }
     }
     recognitionsList = newRecognitionsList;
-
     if (recognitionsList.isNotEmpty) {
       _predict();
     }
@@ -76,6 +90,7 @@ class _CameraScreenState extends State<CameraScreen> {
     var a = await convertYUV420toImageColor(cameraImage!);
     img.Image? imageInput = img.decodeImage(a!);
     var pred = _classifier.predict(imageInput);
+    print(pred);
   }
 
   @override
