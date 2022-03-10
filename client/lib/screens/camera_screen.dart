@@ -1,3 +1,4 @@
+import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:camera/camera.dart';
 import 'package:candrink/services/ml_kit/barcode_scanner.dart';
 import 'package:candrink/services/tflite/image_classification/classifier.dart';
@@ -20,6 +21,7 @@ class CameraScreen extends StatefulWidget {
 }
 
 class _CameraScreenState extends State<CameraScreen> {
+  final assetsAudioPlayer = AssetsAudioPlayer();
   bool available = true;
   CameraController? cameraController;
   CameraImage? cameraImage;
@@ -86,6 +88,12 @@ class _CameraScreenState extends State<CameraScreen> {
     }
   }
 
+  void playBeep() {
+    assetsAudioPlayer.open(
+      Audio("assets/sound/beep.mp3"),
+    );
+  }
+
   void _predict() async {
     var a = await convertYUV420toImageColor(cameraImage!);
     img.Image? imageInput = img.decodeImage(a!);
@@ -108,6 +116,7 @@ class _CameraScreenState extends State<CameraScreen> {
     _classifier = ClassifierQuant();
 
     loadModel();
+    playBeep();
     initCamera();
   }
 
