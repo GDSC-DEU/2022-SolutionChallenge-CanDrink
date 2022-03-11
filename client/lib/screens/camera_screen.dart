@@ -7,6 +7,7 @@ import 'package:candrink/services/tflite/object_detection/tflite_service.dart';
 import 'package:candrink/services/tts_service.dart';
 import 'package:candrink/utils/barcode_information.dart';
 import 'package:candrink/utils/image_convert.dart';
+import 'package:candrink/utils/vibration.dart';
 import 'package:flutter/material.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:image/image.dart' as img;
@@ -61,6 +62,7 @@ class _CameraScreenState extends State<CameraScreen> {
                       print(
                           "type: $type, displayValue: $displayValue, rawValue: $rawValue");
                       tts.speak(await getBarcodeInformation(rawValue!));
+                      vibrateStrong();
                     }
                   }
                   filterRecognitions();
@@ -108,6 +110,7 @@ class _CameraScreenState extends State<CameraScreen> {
     img.Image? imageInput = img.decodeImage(a!);
     var pred = _classifier.predict(imageInput);
     tts.speak(pred.label);
+    vibrateStrong();
     print(pred.label);
   }
 
@@ -129,6 +132,9 @@ class _CameraScreenState extends State<CameraScreen> {
     playBeep();
     initCamera();
     initTTS();
+
+    startVibrate();
+    vibrateWeek();
   }
 
   List<Widget> boxRecognizedObjects(Size screen) {
