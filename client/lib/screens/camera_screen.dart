@@ -5,6 +5,7 @@ import 'package:candrink/services/tflite/image_classification/classifier.dart';
 import 'package:candrink/services/tflite/image_classification/classifier_quant.dart';
 import 'package:candrink/services/tflite/object_detection/tflite_service.dart';
 import 'package:candrink/services/tts_service.dart';
+import 'package:candrink/utils/barcode_information.dart';
 import 'package:candrink/utils/image_convert.dart';
 import 'package:flutter/material.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
@@ -59,6 +60,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
                       print(
                           "type: $type, displayValue: $displayValue, rawValue: $rawValue");
+                      tts.speak(await getBarcodeInformation(rawValue!));
                     }
                   }
                   filterRecognitions();
