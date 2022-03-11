@@ -4,6 +4,7 @@ import 'package:candrink/services/ml_kit/barcode_scanner.dart';
 import 'package:candrink/services/tflite/image_classification/classifier.dart';
 import 'package:candrink/services/tflite/image_classification/classifier_quant.dart';
 import 'package:candrink/services/tflite/object_detection/tflite_service.dart';
+import 'package:candrink/services/tts_service.dart';
 import 'package:candrink/utils/image_convert.dart';
 import 'package:flutter/material.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
@@ -21,6 +22,7 @@ class CameraScreen extends StatefulWidget {
 }
 
 class _CameraScreenState extends State<CameraScreen> {
+  TTSService tts = TTSService();
   final assetsAudioPlayer = AssetsAudioPlayer();
   bool available = true;
   CameraController? cameraController;
@@ -74,6 +76,11 @@ class _CameraScreenState extends State<CameraScreen> {
     );
   }
 
+  void initTTS() async {
+    await tts.initLanguages();
+    setState(() {});
+  }
+
   void filterRecognitions() {
     var newRecognitionsList = [];
     for (var result in recognitionsList) {
@@ -98,7 +105,8 @@ class _CameraScreenState extends State<CameraScreen> {
     var a = await convertYUV420toImageColor(cameraImage!);
     img.Image? imageInput = img.decodeImage(a!);
     var pred = _classifier.predict(imageInput);
-    print(pred);
+    tts.speak(pred.label);
+    print(pred.label);
   }
 
   @override
@@ -118,6 +126,7 @@ class _CameraScreenState extends State<CameraScreen> {
     loadModel();
     playBeep();
     initCamera();
+    initTTS();
   }
 
   List<Widget> boxRecognizedObjects(Size screen) {
