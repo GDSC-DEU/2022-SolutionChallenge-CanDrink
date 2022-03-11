@@ -10,7 +10,12 @@
     },
     "editor.defaultFormatter": "ms-python.python"
   },
-
+  "python.defaultInterpreterPath": ".venv/Scripts/python.exe",
+  "python.terminal.activateEnvInCurrentTerminal": true,
   "python.formatting.provider": "black",
-  "python.sortImports.args": ["--profile=black"]
+  "python.sortImports.args": ["--profile=black"],
+  "python.formatting.blackArgs": [
+    "--line-length",
+    "150"
+],
 }
