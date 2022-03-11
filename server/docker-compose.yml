@@ -1,0 +1,12 @@
+version: '3.7'
+services:
+  docker-fastapi:
+      container_name: docker-fastapi
+      build: .
+      restart: always
+      ports:
+        - 8000:8000
+      volumes:
+        # 개발 환경에서 소스코드를 수정했을 때 일일이 빌드안해도 적용할 수 있도록
+        # 로컬의 소스코드를 볼륨으로 탑재
+        - ./app:/app
