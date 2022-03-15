@@ -17,6 +17,19 @@ cd server
 
 <pre><code>docker-compose up</code></pre>
 
+## Directory
+
+```sh
+app
+├─ routes
+│  ├─ views.py
+├─ tffile
+│  ├─ labels #label files
+│  ├─ models #model files
+├─ main.py
+├─ run.py
+```
+
 ## LICENSE
 
 [MIT License](./LICENSE)
