@@ -24,7 +24,6 @@ def get_latest(base_path: str):
 
 def get_path(tffile: str):
     return os.path.join(
-        "app",
         "tffile",
         tffile,
     )

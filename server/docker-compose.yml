@@ -1,7 +1,7 @@
 version: '3.7'
 services:
-  docker-fastapi:
-      container_name: docker-fastapi
+  candrink-server:
+      container_name: candrink-server
       build: .
       restart: always
       ports:
