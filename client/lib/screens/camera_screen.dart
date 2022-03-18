@@ -94,8 +94,8 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   void _predict() async {
-    var a = await convertYUV420toImageColor(cameraImage!);
-    img.Image? imageInput = img.decodeImage(a!);
+    var convertedImage = await convertYUV420toImageColor(cameraImage!);
+    img.Image? imageInput = img.decodeImage(convertedImage!);
     var pred = _classifier.predict(imageInput);
     tts.speak(pred.label);
     vibrateStrong();
