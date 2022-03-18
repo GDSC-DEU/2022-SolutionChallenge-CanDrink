@@ -1,6 +1,6 @@
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:camera/camera.dart';
-import 'package:candrink/services/ml_kit/barcode_scanner.dart';
+import 'package:candrink/services/barcode_scanner.dart';
 import 'package:candrink/services/tflite/image_classification/classifier.dart';
 import 'package:candrink/services/tflite/image_classification/classifier_quant.dart';
 import 'package:candrink/services/tflite/object_detection/tflite_service.dart';
@@ -26,69 +26,58 @@ class CameraScreen extends StatefulWidget {
 class _CameraScreenState extends State<CameraScreen> {
   TTSService tts = TTSService();
   final assetsAudioPlayer = AssetsAudioPlayer();
-  bool available = true;
+  bool cameraOccupied = false;
   CameraController? cameraController;
   CameraImage? cameraImage;
-  Category? category;
   late Classifier _classifier;
   List recognitionsList = [];
 
   initCamera() async {
-    cameraController =
-        CameraController(widget.cameras[0], ResolutionPreset.veryHigh);
-    cameraController!.initialize().then(
-      (_) {
-        if (!mounted) {
+    cameraController = CameraController(widget.cameras[0], ResolutionPreset.veryHigh);
+    cameraController!.initialize().then((_) {
+      if (!mounted) {
+        return;
+      }
+
+      cameraController?.startImageStream((image) async {
+        setState(() {
+          cameraImage = image;
+        });
+
+        if (cameraOccupied) {
           return;
         }
-        setState(
-          () {
-            cameraController?.startImageStream(
-              (image) async {
-                if (available) {
-                  available = false;
-                  cameraImage = image;
+        cameraOccupied = true;
+
         var barcodes = await scanBarcodes(cameraImage);
-                    recognitionsList =
-                        await runModel(cameraImage, recognitionsList);
-                  } else {
-                    for (Barcode barcode in barcodes) {
-                      final BarcodeType type = barcode.type;
-                      final Rect? boundingBox = barcode.value.boundingBox;
-                      final String? displayValue = barcode.value.displayValue;
-                      final String? rawValue = barcode.value.rawValue;
+        if (barcodes.isEmpty) {
+          recognitionsList = await runModel(cameraImage, recognitionsList);
+        } else {
+          for (Barcode barcode in barcodes) {
+            final BarcodeType type = barcode.type;
+            // final Rect? boundingBox = barcode.value.boundingBox;
+            final String? displayValue = barcode.value.displayValue;
+            final String? rawValue = barcode.value.rawValue;
 
-                      print(
-                          "type: $type, displayValue: $displayValue, rawValue: $rawValue");
-                      tts.speak(await getBarcodeInformation(rawValue!));
-                      vibrateStrong();
-                    }
-                  }
-                  filterRecognitions();
-                  setState(() {
-                    cameraImage;
-                  });
-                  await Future.delayed(const Duration(seconds: 1));
-                  available = true;
-                }
-              },
-            );
-          },
-        );
-      },
-    );
-  }
-
-  void initTTS() async {
-    await tts.initLanguages();
-    setState(() {});
+            print("type: $type, displayValue: $displayValue, rawValue: $rawValue");
+            final productName = await getProductNameFromBarcode(rawValue!);
+            if (productName != null) {
+              tts.speak(productName);
+              vibrateStrong();
+            }
+          }
+        }
+        filterRecognitions();
+        await Future.delayed(const Duration(seconds: 1));
+        cameraOccupied = false;
+      });
+    });
   }
 
   void filterRecognitions() {
     var newRecognitionsList = [];
     for (var result in recognitionsList) {
-      if (result['detectedClass'] == 'can' ||
-          result['detectedClass'] == 'bottle') {
+      if (result['detectedClass'] == 'can' || result['detectedClass'] == 'bottle') {
         newRecognitionsList.add(result);
       }
     }
@@ -98,7 +87,7 @@ class _CameraScreenState extends State<CameraScreen> {
     }
   }
 
-  void playBeep() {
+  void playInitializationSound() {
     assetsAudioPlayer.open(
       Audio("assets/sound/beep.mp3"),
     );
@@ -128,9 +117,8 @@ class _CameraScreenState extends State<CameraScreen> {
     _classifier = ClassifierQuant();
 
     loadModel();
-    playBeep();
+    playInitializationSound();
     initCamera();
-    initTTS();
 
     startVibrate();
     vibrateWeek();
@@ -139,7 +127,6 @@ class _CameraScreenState extends State<CameraScreen> {
   List<Widget> boxRecognizedObjects(Size screen) {
     double factorX = screen.width;
     double factorY = screen.height;
-
     Color colorPick = Colors.red;
 
     return recognitionsList.map((result) {
