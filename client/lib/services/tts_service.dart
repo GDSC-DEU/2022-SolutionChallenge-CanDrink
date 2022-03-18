@@ -6,11 +6,7 @@ class TTSService {
   set volume(double _volume) => tts.setVolume(_volume);
   set rate(double _rate) => tts.setRate(_rate);
   set pitch(double _pitch) => tts.setPitch(_pitch);
-
-  String? voice;
-  set languageCode(String languageCode) => {
-        tts.getVoiceByLang(languageCode).then((voices) => {voice = voices?.first})
-      };
+  set languageCode(String _languageCode) => tts.setLanguage(_languageCode);
 
   static final TTSService _ttsService = TTSService._();
 
