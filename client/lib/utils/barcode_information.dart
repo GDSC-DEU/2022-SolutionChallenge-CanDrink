@@ -6,6 +6,10 @@ Future<String?> getProductNameFromBarcode(String barcode) async {
   final response = await http.get(url);
   final doc = htmlparser.parse(response.body);
 
-  final name = doc.getElementsByClassName('container').elementAt(0).getElementsByTagName('b').elementAt(0).innerHtml;
-  return name;
+  try {
+    var name = doc.getElementsByClassName('container')[0].getElementsByTagName('b')[0].innerHtml;
+    return name;
+  } catch (e) {
+    return '상품 정보가 없습니다.';
+  }
 }
