@@ -44,8 +44,7 @@ abstract class Classifier {
 
   Future<void> loadModel() async {
     try {
-      interpreter =
-          await Interpreter.fromAsset(modelName, options: _interpreterOptions);
+      interpreter = await Interpreter.fromAsset(modelName, options: _interpreterOptions);
       print('Interpreter Created Successfully');
 
       _inputShape = interpreter.getInputTensor(0).shape;
@@ -54,8 +53,7 @@ abstract class Classifier {
       _outputType = interpreter.getOutputTensor(0).type;
 
       _outputBuffer = TensorBuffer.createFixedSize(_outputShape, _outputType);
-      _probabilityProcessor =
-          TensorProcessorBuilder().add(postProcessNormalizeOp).build();
+      _probabilityProcessor = TensorProcessorBuilder().add(postProcessNormalizeOp).build();
     } catch (e) {
       print('Unable to create interpreter, Caught Exception: ${e.toString()}');
     }
@@ -74,8 +72,7 @@ abstract class Classifier {
     int cropSize = min(_inputImage.height, _inputImage.width);
     return ImageProcessorBuilder()
         .add(ResizeWithCropOrPadOp(cropSize, cropSize))
-        .add(ResizeOp(
-            _inputShape[1], _inputShape[2], ResizeMethod.NEAREST_NEIGHBOUR))
+        .add(ResizeOp(_inputShape[1], _inputShape[2], ResizeMethod.NEAREST_NEIGHBOUR))
         .add(preProcessNormalizeOp)
         .build()
         .process(_inputImage);
@@ -96,9 +93,7 @@ abstract class Classifier {
 
     print('Time to run inference: $run ms');
 
-    Map<String, double> labeledProb = TensorLabel.fromList(
-            labels, _probabilityProcessor.process(_outputBuffer))
-        .getMapWithFloatValue();
+    Map<String, double> labeledProb = TensorLabel.fromList(labels, _probabilityProcessor.process(_outputBuffer)).getMapWithFloatValue();
     final pred = getTopProbability(labeledProb);
 
     return Category(pred.key, pred.value);
