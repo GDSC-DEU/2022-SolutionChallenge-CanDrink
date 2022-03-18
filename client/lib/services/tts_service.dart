@@ -1,32 +1,27 @@
 import 'package:text_to_speech/text_to_speech.dart';
 
 class TTSService {
-  TextToSpeech tts = TextToSpeech();
+  final tts = TextToSpeech();
 
-  double volume = 1.0;
-  double rate = 1.0;
-  double pitch = 1.0;
+  set volume(double _volume) => tts.setVolume(_volume);
+  set rate(double _rate) => tts.setRate(_rate);
+  set pitch(double _pitch) => tts.setPitch(_pitch);
+  set languageCode(String _languageCode) => tts.setLanguage(_languageCode);
 
-  final String languageCode = 'ko-KR';
-  String? voice;
+  static final TTSService _ttsService = TTSService._();
 
-  Future<void> initLanguages() async {
-    voice = await getVoiceByLang(languageCode);
+  factory TTSService() {
+    return _ttsService;
   }
 
-  Future<String?> getVoiceByLang(String lang) async {
-    final List<String>? voices = await tts.getVoiceByLang(languageCode);
-    if (voices != null && voices.isNotEmpty) {
-      return voices.first;
-    }
-    return null;
+  TTSService._() {
+    volume = 1.0;
+    rate = 1.0;
+    pitch = 1.0;
+    languageCode = "ko-KR";
   }
 
   void speak(String text) {
-    tts.setVolume(volume);
-    tts.setRate(rate);
-    tts.setLanguage(languageCode);
-    tts.setPitch(pitch);
     tts.speak(text);
   }
 }

@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 
-Future<List<Barcode>> scanBarcode(CameraImage? cameraImage) async {
+Future<List<Barcode>> scanBarcodes(CameraImage? cameraImage) async {
   final WriteBuffer allBytes = WriteBuffer();
 
   for (Plane plane in cameraImage!.planes) {
@@ -12,14 +12,11 @@ Future<List<Barcode>> scanBarcode(CameraImage? cameraImage) async {
 
   final bytes = allBytes.done().buffer.asUint8List();
 
-  final Size imageSize =
-      Size(cameraImage.width.toDouble(), cameraImage.height.toDouble());
+  final Size imageSize = Size(cameraImage.width.toDouble(), cameraImage.height.toDouble());
 
   const InputImageRotation imageRotation = InputImageRotation.Rotation_0deg;
 
-  final InputImageFormat inputImageFormat =
-      InputImageFormatMethods.fromRawValue(cameraImage.format.raw) ??
-          InputImageFormat.NV21;
+  final InputImageFormat inputImageFormat = InputImageFormatMethods.fromRawValue(cameraImage.format.raw) ?? InputImageFormat.NV21;
 
   final planeData = cameraImage.planes.map(
     (Plane plane) {
@@ -38,8 +35,7 @@ Future<List<Barcode>> scanBarcode(CameraImage? cameraImage) async {
     planeData: planeData,
   );
 
-  final inputImage =
-      InputImage.fromBytes(bytes: bytes, inputImageData: inputImageData);
+  final inputImage = InputImage.fromBytes(bytes: bytes, inputImageData: inputImageData);
 
   final barcodeScanner = GoogleMlKit.vision.barcodeScanner();
 

@@ -1,6 +1,6 @@
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:camera/camera.dart';
-import 'package:candrink/services/ml_kit/barcode_scanner.dart';
+import 'package:candrink/services/barcode_scanner.dart';
 import 'package:candrink/services/tflite/image_classification/classifier.dart';
 import 'package:candrink/services/tflite/image_classification/classifier_quant.dart';
 import 'package:candrink/services/tflite/object_detection/tflite_service.dart';
@@ -9,10 +9,8 @@ import 'package:candrink/utils/barcode_information.dart';
 import 'package:candrink/utils/image_convert.dart';
 import 'package:candrink/utils/vibration.dart';
 import 'package:flutter/material.dart';
-import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:image/image.dart' as img;
 import 'package:tflite/tflite.dart';
-import 'package:tflite_flutter_helper/tflite_flutter_helper.dart';
 
 class CameraScreen extends StatefulWidget {
   List<CameraDescription> cameras;
@@ -26,88 +24,57 @@ class CameraScreen extends StatefulWidget {
 class _CameraScreenState extends State<CameraScreen> {
   TTSService tts = TTSService();
   final assetsAudioPlayer = AssetsAudioPlayer();
-  bool available = true;
+  bool cameraOccupied = false;
   CameraController? cameraController;
   CameraImage? cameraImage;
-  Category? category;
   late Classifier _classifier;
   List recognitionsList = [];
 
   initCamera() async {
-    cameraController =
-        CameraController(widget.cameras[0], ResolutionPreset.veryHigh);
-    cameraController!.initialize().then(
-      (_) {
-        if (!mounted) {
+    cameraController = CameraController(widget.cameras[0], ResolutionPreset.veryHigh);
+    cameraController!.initialize().then((_) {
+      if (!mounted) {
+        return;
+      }
+
+      cameraController?.startImageStream((image) async {
+        setState(() {
+          cameraImage = image;
+        });
+
+        if (cameraOccupied) {
           return;
         }
-        setState(
-          () {
-            cameraController?.startImageStream(
-              (image) async {
-                if (available) {
-                  available = false;
-                  cameraImage = image;
-                  var barcodes = await scanBarcode(cameraImage);
-                  if (barcodes.isEmpty) {
-                    recognitionsList =
-                        await runModel(cameraImage, recognitionsList);
-                  } else {
-                    for (Barcode barcode in barcodes) {
-                      final BarcodeType type = barcode.type;
-                      final Rect? boundingBox = barcode.value.boundingBox;
-                      final String? displayValue = barcode.value.displayValue;
-                      final String? rawValue = barcode.value.rawValue;
+        cameraOccupied = true;
 
-                      print(
-                          "type: $type, displayValue: $displayValue, rawValue: $rawValue");
-                      tts.speak(await getBarcodeInformation(rawValue!));
-                      vibrateStrong();
-                    }
-                  }
-                  filterRecognitions();
-                  setState(() {
-                    cameraImage;
-                  });
-                  await Future.delayed(const Duration(seconds: 1));
-                  available = true;
-                }
-              },
-            );
-          },
-        );
-      },
-    );
+        var barcodes = await scanBarcodes(cameraImage);
+        if (barcodes.isNotEmpty) {
+          final productName = await getProductNameFromBarcode(barcodes[0].value.rawValue!);
+          if (productName != null) {
+            tts.speak(productName);
+            vibrateStrong();
+          }
+        } else {
+          recognitionsList = await runModel(cameraImage, recognitionsList);
+          if (recognitionsList.isNotEmpty) {
+            _predict();
+          }
+        }
+        await Future.delayed(const Duration(seconds: 1));
+        cameraOccupied = false;
+      });
+    });
   }
 
-  void initTTS() async {
-    await tts.initLanguages();
-    setState(() {});
-  }
-
-  void filterRecognitions() {
-    var newRecognitionsList = [];
-    for (var result in recognitionsList) {
-      if (result['detectedClass'] == 'can' ||
-          result['detectedClass'] == 'bottle') {
-        newRecognitionsList.add(result);
-      }
-    }
-    recognitionsList = newRecognitionsList;
-    if (recognitionsList.isNotEmpty) {
-      _predict();
-    }
-  }
-
-  void playBeep() {
+  void playInitializationSound() {
     assetsAudioPlayer.open(
       Audio("assets/sound/beep.mp3"),
     );
   }
 
   void _predict() async {
-    var a = await convertYUV420toImageColor(cameraImage!);
-    img.Image? imageInput = img.decodeImage(a!);
+    var convertedImage = await convertYUV420toImageColor(cameraImage!);
+    img.Image? imageInput = img.decodeImage(convertedImage!);
     var pred = _classifier.predict(imageInput);
     tts.speak(pred.label);
     vibrateStrong();
@@ -129,9 +96,8 @@ class _CameraScreenState extends State<CameraScreen> {
     _classifier = ClassifierQuant();
 
     loadModel();
-    playBeep();
+    playInitializationSound();
     initCamera();
-    initTTS();
 
     startVibrate();
     vibrateWeek();
@@ -140,7 +106,6 @@ class _CameraScreenState extends State<CameraScreen> {
   List<Widget> boxRecognizedObjects(Size screen) {
     double factorX = screen.width;
     double factorY = screen.height;
-
     Color colorPick = Colors.red;
 
     return recognitionsList.map((result) {

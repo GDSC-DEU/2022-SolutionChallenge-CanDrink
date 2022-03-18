@@ -8,7 +8,7 @@ List<CameraDescription> cameras = [];
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  if (!await getPermission()) {
+  if (!await requestPermissions()) {
     SystemChannels.platform.invokeMethod('SystemNavigator.pop');
   }
   cameras = await availableCameras();

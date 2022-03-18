@@ -39,11 +39,11 @@ Future<void> startVibrate() async {
     vibrateWeek();
 
     await Vibration.vibrate(
-        amplitude: vibrationPattern.amplitude,
-        pattern: vibrationPattern.pattern);
+      amplitude: vibrationPattern.amplitude,
+      pattern: vibrationPattern.pattern,
+    );
 
-    await Future.delayed(Duration(
-        milliseconds: vibrationPattern.pattern.reduce((a, b) => a + b)));
+    await Future.delayed(Duration(milliseconds: vibrationPattern.pattern.reduce((a, b) => a + b)));
 
     return true;
   });
