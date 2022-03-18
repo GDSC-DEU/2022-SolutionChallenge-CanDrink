@@ -19,5 +19,17 @@ runModel(CameraImage? cameraImage, List recognitionsList) async {
     threshold: 0.4,
   ))!;
 
+  recognitionsList = filterRecognitions(recognitionsList);
+
   return recognitionsList;
+}
+
+List filterRecognitions(List recognitionsList) {
+  var newRecognitionsList = [];
+  for (var result in recognitionsList) {
+    if (result['detectedClass'] == 'can' || result['detectedClass'] == 'bottle') {
+      newRecognitionsList.add(result);
+    }
+  }
+  return newRecognitionsList;
 }

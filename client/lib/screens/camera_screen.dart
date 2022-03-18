@@ -9,10 +9,8 @@ import 'package:candrink/utils/barcode_information.dart';
 import 'package:candrink/utils/image_convert.dart';
 import 'package:candrink/utils/vibration.dart';
 import 'package:flutter/material.dart';
-import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:image/image.dart' as img;
 import 'package:tflite/tflite.dart';
-import 'package:tflite_flutter_helper/tflite_flutter_helper.dart';
 
 class CameraScreen extends StatefulWidget {
   List<CameraDescription> cameras;
@@ -50,41 +48,22 @@ class _CameraScreenState extends State<CameraScreen> {
         cameraOccupied = true;
 
         var barcodes = await scanBarcodes(cameraImage);
-        if (barcodes.isEmpty) {
-          recognitionsList = await runModel(cameraImage, recognitionsList);
+        if (barcodes.isNotEmpty) {
+          final productName = await getProductNameFromBarcode(barcodes[0].value.rawValue!);
+          if (productName != null) {
+            tts.speak(productName);
+            vibrateStrong();
+          }
         } else {
-          for (Barcode barcode in barcodes) {
-            final BarcodeType type = barcode.type;
-            // final Rect? boundingBox = barcode.value.boundingBox;
-            final String? displayValue = barcode.value.displayValue;
-            final String? rawValue = barcode.value.rawValue;
-
-            print("type: $type, displayValue: $displayValue, rawValue: $rawValue");
-            final productName = await getProductNameFromBarcode(rawValue!);
-            if (productName != null) {
-              tts.speak(productName);
-              vibrateStrong();
-            }
+          recognitionsList = await runModel(cameraImage, recognitionsList);
+          if (recognitionsList.isNotEmpty) {
+            _predict();
           }
         }
-        filterRecognitions();
         await Future.delayed(const Duration(seconds: 1));
         cameraOccupied = false;
       });
     });
-  }
-
-  void filterRecognitions() {
-    var newRecognitionsList = [];
-    for (var result in recognitionsList) {
-      if (result['detectedClass'] == 'can' || result['detectedClass'] == 'bottle') {
-        newRecognitionsList.add(result);
-      }
-    }
-    recognitionsList = newRecognitionsList;
-    if (recognitionsList.isNotEmpty) {
-      _predict();
-    }
   }
 
   void playInitializationSound() {
