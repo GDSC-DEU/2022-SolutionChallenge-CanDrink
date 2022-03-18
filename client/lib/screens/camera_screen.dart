@@ -48,8 +48,7 @@ class _CameraScreenState extends State<CameraScreen> {
                 if (available) {
                   available = false;
                   cameraImage = image;
-                  var barcodes = await scanBarcode(cameraImage);
-                  if (barcodes.isEmpty) {
+        var barcodes = await scanBarcodes(cameraImage);
                     recognitionsList =
                         await runModel(cameraImage, recognitionsList);
                   } else {
