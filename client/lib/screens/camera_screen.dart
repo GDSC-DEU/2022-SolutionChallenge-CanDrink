@@ -1,5 +1,6 @@
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:camera/camera.dart';
+import 'package:candrink/services/asset_download.dart';
 import 'package:candrink/services/barcode_scanner.dart';
 import 'package:candrink/services/tflite/image_classification/classifier.dart';
 import 'package:candrink/services/tflite/image_classification/classifier_quant.dart';
@@ -24,6 +25,7 @@ class CameraScreen extends StatefulWidget {
 class _CameraScreenState extends State<CameraScreen> {
   TTSService tts = TTSService();
   final assetsAudioPlayer = AssetsAudioPlayer();
+  AssetDownloader assetDownloader = AssetDownloader();
   bool cameraOccupied = false;
   CameraController? cameraController;
   CameraImage? cameraImage;
@@ -72,6 +74,13 @@ class _CameraScreenState extends State<CameraScreen> {
     );
   }
 
+  void _downloadAsset() async {
+    await assetDownloader.initAssetDownloader();
+    if (!await assetDownloader.isDownloaded()) {
+      await assetDownloader.downloadAsset();
+    }
+  }
+
   void _predict() async {
     var convertedImage = await convertYUV420toImageColor(cameraImage!);
     img.Image? imageInput = img.decodeImage(convertedImage!);
@@ -95,6 +104,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
     _classifier = ClassifierQuant();
 
+    _downloadAsset();
     loadModel();
     playInitializationSound();
     initCamera();
