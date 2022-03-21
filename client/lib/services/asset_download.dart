@@ -13,7 +13,7 @@ class AssetDownloader {
   }
 
   Future checkUpdate() async {
-    var checkUrl = Uri.parse('http://ssh.qwertycvb.site:8000/check?tffile=labels');
+    var checkUrl = Uri.parse('http://ssh.qwertycvb.site:8000/check');
     var response = await http.get(checkUrl);
     var doc = htmlparser.parse(response.body);
     var version = doc.body!.text.substring(1, 3);
@@ -27,7 +27,7 @@ class AssetDownloader {
   Future downloadAsset() async {
     try {
       await downloadAssetsController.startDownload(
-          assetsUrl: 'http://ssh.qwertycvb.site:8000/update?tffile=labels',
+          assetsUrl: 'http://ssh.qwertycvb.site:8000/update',
           onProgress: (progressValue) {
             print(progressValue);
             if (progressValue == 100) {
