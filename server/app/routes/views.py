@@ -22,22 +22,21 @@ def get_latest(base_path: str):
     return file_path, recent_file_name
 
 
-def get_path(tffile: str):
+def get_path():
     return os.path.join(
         "tffile",
-        tffile,
     )
 
 
 @router.get("/update")
-def update_file(tffile: str):
-    base_path = get_path(tffile)
+def update_file():
+    base_path = get_path()
     file_path, recent_file_name = get_latest(base_path)
     return FileResponse(path=file_path, filename=recent_file_name)
 
 
 @router.get("/check")
-def check_file(tffile: str):
-    base_path = get_path(tffile)
+def check_file():
+    base_path = get_path()
     file_path, recent_file_name = get_latest(base_path)
     return recent_file_name
