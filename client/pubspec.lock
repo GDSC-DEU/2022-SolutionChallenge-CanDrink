@@ -127,6 +127,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "1.0.4"
+  dio:
+    dependency: transitive
+    description:
+      name: dio
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "4.0.4"
+  download_assets:
+    dependency: "direct main"
+    description:
+      name: download_assets
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.0.0"
   fake_async:
     dependency: transitive
     description:
@@ -521,9 +535,11 @@ packages:
   tflite_flutter_helper:
     dependency: "direct main"
     description:
-      name: tflite_flutter_helper
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "."
+      ref: dev
+      resolved-ref: dafe414905479c15c6afe58455996fa5a1579be4
+      url: "https://github.com/SerenityS/tflite_flutter_helper"
+    source: git
     version: "0.3.1"
   tuple:
     dependency: transitive
