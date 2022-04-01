@@ -6,7 +6,8 @@ This project is **CanDrink**, a canned drink recognition service for the visuall
 
 Of the many canned drinks, there are only two types of drinks that can be classified in braille: 'just drink' and 'soda'. This is what canned drinks look like from a blind person's point of view. So we created a service that helps visually impaired people choose their favorite drinks.
 
-<iframe width="774" height="435" src="https://www.youtube.com/embed/zg14ulTd5mM" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+**[YouTube Link](https://www.youtube.com/embed/zg14ulTd5mM)**
 
 <br><br>
 
