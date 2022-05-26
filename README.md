@@ -1,3 +1,4 @@
+<!-- omit in toc -->
 # 2022-SolutionChallenge-CanDrink
 
 This project is **CanDrink**, a canned drink recognition service for the visually impaired.
@@ -11,11 +12,16 @@ Of the many canned drinks, there are only two types of drinks that can be classi
 
 <br><br>
 
-## Table of Contents
+<!-- omit in toc -->
+# [ANNOUNCE] Congrats!! This project has been shortlisted to the global TOP 50!
 
-- [2022-SolutionChallenge-CanDrink](#2022-solutionchallenge-candrink)
-  - [Summary](#summary)
-  - [Table of Contents](#table-of-contents)
+![image](https://user-images.githubusercontent.com/20203944/170526199-496c7776-de75-4b18-bf48-9ff3611289b4.png)
+
+<br><br>
+
+<!-- omit in toc -->
+# Table of Contents
+
 - [CanDrink Server](#candrink-server)
   - [Getting Started](#getting-started)
     - [Installation](#installation)
