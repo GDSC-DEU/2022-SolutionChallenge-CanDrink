@@ -39,6 +39,13 @@ Of the many canned drinks, there are only two types of drinks that can be classi
     - [Installation](#installation-2)
     - [Run](#run-2)
   - [LICENSE](#license-2)
+- [ML Notebook](#ml-notebook)
+  - [Environment](#environment)
+  - [Setup CUDA](#setup-cuda)
+    - [Install nvidia driver](#install-nvidia-driver)
+    - [Install CUDA 11.2](#install-cuda-112)
+    - [Install cuDNN 8.1.0](#install-cudnn-810)
+    - [Verify Installation](#verify-installation)
 
 <br><br>
 
@@ -142,3 +149,60 @@ python crawler.py
 ## LICENSE
 
 [MIT License](./LICENSE)
+
+<br><br>
+
+# ML Notebook
+
+## Environment
+
+* OS: Ubuntu 20.04.4 LTS x86_64
+* CPU: 11th Gen Intel CPU
+* GPU: NVIDIA 3080 Ti with 12GB VRAM
+* GPU Driver Version: 470.129.06
+* CUDA Version: 11.2
+* cuDNN Version: 8.1.0
+
+## Setup CUDA
+
+If you have nvidia GPU, you can accelerate training speed rapidly. This section tells you how to set up a GPU. For more details about requirements, please see [TensorFlow Installation Guide](https://www.tensorflow.org/install/pip)
+
+### Install nvidia driver
+Go to https://www.nvidia.com/en-us/geforce/drivers/ and scroll down to **MANUAL DRIVER SEARCH**, search your GPU's driver. You can find various versions i.e. `470`, `510`
+
+TensorFlow requires `450.80.02+`, but closest version may get better result.
+
+After complete download, run file as root.
+```sh
+sudo sh NVIDIA-Linux-x86_64-470.129.06.run
+```
+
+... Occasionally you can see this error:
+> `An NVIDIA kernel module 'nvidia-drm' appears to already be loaded ...`
+
+Please ensure GUI is disabled. If you are using Ubuntu Desktop 20.04, `sudo service gdm3 stop` helps to resolve this error.
+
+
+### Install CUDA 11.2
+Go to https://developer.nvidia.com/cuda-11.2.0-download-archive?target_os=Linux&target_arch=x86_64&target_distro=Ubuntu&target_version=2004&target_type=runfilelocal and check your OS and architecture. Select **Installer Type** to `runtime (local)` and follow the instruction.
+
+> Note: You must uncheck nvidia-driver-460, this option may causes installation error.
+
+### Install cuDNN 8.1.0
+Go to nvidia cuDNN archive: https://developer.nvidia.com/rdp/cudnn-archive and download **8.1.0 for CUDA 11.0, 11.1 and 11.2**.
+
+### Verify Installation
+Use `nvidia-smi` command to check driver version and CUDA version.
+
+... And run python code below for ensure the tensorflow correctly recognize your GPU device.
+
+```python
+>>> import tensorflow as tf
+>>> tf.config.list_physical_devices('GPU')
+```
+
+When installation was successfully done, you can see following result:
+
+```
+[PhysicalDevice(name='/physical_device:GPU:0', device_type='GPU')]
+```
