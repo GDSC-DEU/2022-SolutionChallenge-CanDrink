@@ -1,0 +1,10 @@
+version: '3.7'
+services:
+  yolo:
+    container_name: yolo
+    build: .
+    restart: always
+    ports:
+      - 5001:5001
+    volumes:
+      - .:/app
