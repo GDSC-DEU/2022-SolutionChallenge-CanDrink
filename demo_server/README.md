@@ -6,7 +6,7 @@
 
 > YOLOv5 Demo Server
 
-### [candrink.kro.kr](candrink.kro.kr)  
+[http://candrink.kro.kr](http://candrink.kro.kr)
 
 ## Feature
 
