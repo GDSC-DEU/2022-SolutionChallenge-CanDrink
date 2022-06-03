@@ -24,6 +24,7 @@ Map<FeedbackType, VibratePattern> VibrationPatterns = {
 };
 
 var feedbackMode = FeedbackType.week;
+var paused = false;
 
 void vibrateWeek() {
   feedbackMode = FeedbackType.week;
@@ -35,6 +36,8 @@ void vibrateStrong() {
 
 Future<void> startVibrate() async {
   Future.doWhile(() async {
+    if (paused) true;
+
     final vibrationPattern = VibrationPatterns[feedbackMode]!;
     vibrateWeek();
 
@@ -47,4 +50,12 @@ Future<void> startVibrate() async {
 
     return true;
   });
+}
+
+void pauseVibrate() {
+  paused = true;
+}
+
+void resumeVibrate() {
+  paused = false;
 }
