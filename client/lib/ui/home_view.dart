@@ -48,6 +48,7 @@ class _HomeViewState extends State<HomeView> {
     var speech = '';
 
     vibrateStrong();
+
     // 음료의 종류가 2종류 이하일 시 그대로 읽어주기
     if (products.length <= 2) {
       speech = products.join(' 그리고 ');
@@ -56,6 +57,13 @@ class _HomeViewState extends State<HomeView> {
     else {
       speech = '음료의 종류가 많습니다';
     }
+
+    setState(() {
+      lastAISpeech = speech;
+    });
+
+    // 사용자가 말하는 중에는 TTS 멈추기
+    if (isYouSpeaking) return;
 
     if (speech.isNotEmpty) {
       if (lastAISpeech == speech) {
@@ -66,9 +74,6 @@ class _HomeViewState extends State<HomeView> {
       }
       countAISpeechRepeated = 0;
       await widget.tts.speak(speech);
-      setState(() {
-        lastAISpeech = speech;
-      });
     }
   }
 
@@ -112,6 +117,7 @@ class _HomeViewState extends State<HomeView> {
           setState(() {
             lastYouSpeech = '';
             isYouSpeaking = true;
+            widget.tts.stop();
           });
           vibrateLong();
         },
