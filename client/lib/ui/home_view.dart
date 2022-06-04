@@ -55,7 +55,7 @@ class _HomeViewState extends State<HomeView> {
       speech = '음료의 종류가 많습니다';
     }
 
-    if (speech.isNotEmpty && speech != previousSpeech) {
+    if (speech.isNotEmpty) {
       await widget.tts.speak(speech);
       previousSpeech = speech;
     }
