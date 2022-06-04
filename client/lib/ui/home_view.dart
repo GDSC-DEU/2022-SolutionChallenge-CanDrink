@@ -95,7 +95,7 @@ class _HomeViewState extends State<HomeView> {
         lastYouSpeech = _lastWord;
       });
       for (var recognition in recognitions) {
-        if (_lastWord != "" && recognition.label.contains(_lastWord) && !isYouSpeaking) {
+        if (_lastWord != "" && recognition.label.contains(_lastWord) && isYouSpeaking) {
           setState(() {
             lastAISpeech = "${recognition.label}가 있습니다.";
           });
