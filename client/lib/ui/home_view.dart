@@ -68,7 +68,7 @@ class _HomeViewState extends State<HomeView> {
     if (speech.isNotEmpty) {
       if (lastAISpeech == speech) {
         countAISpeechRepeated++;
-        if (countAISpeechRepeated < 3) {
+        if (countAISpeechRepeated < 2) {
           return;
         }
       }
