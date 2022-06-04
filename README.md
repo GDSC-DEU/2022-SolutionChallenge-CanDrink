@@ -1,21 +1,31 @@
+<center>
+
+<img src="./resources/candrink.png" width="200" height="200">
+
 <!-- omit in toc -->
 # 2022-SolutionChallenge-CanDrink
 
-This project is **CanDrink**, a canned drink recognition service for the visually impaired.
+We are aim to a world where blind people have free from the inconvinience of failure of recognizing cans.
+
+</center>
+
+<br>
+<br>
 
 ## Summary
 
 Of the many canned drinks, there are only two types of drinks that can be classified in braille: 'just drink' and 'soda'. This is what canned drinks look like from a blind person's point of view. So we created a service that helps visually impaired people choose their favorite drinks.
 
-
-**[YouTube Link](https://www.youtube.com/embed/zg14ulTd5mM)**
+You can see more detail on **[Intoduction YouTube Link](https://www.youtube.com/embed/zg14ulTd5mM)**!
 
 <br><br>
 
 <!-- omit in toc -->
 # [ANNOUNCE] Congrats!! This project has been shortlisted to the global TOP 50!
 
-![image](https://user-images.githubusercontent.com/20203944/170526199-496c7776-de75-4b18-bf48-9ff3611289b4.png)
+Click image to see more detail!
+
+[![image](https://user-images.githubusercontent.com/20203944/170526199-496c7776-de75-4b18-bf48-9ff3611289b4.png)](https://developers.google.com/community/gdsc-solution-challenge/winners)
 
 <br><br>
 
@@ -27,18 +37,18 @@ Of the many canned drinks, there are only two types of drinks that can be classi
     - [Installation](#installation)
     - [Run](#run)
   - [Directory](#directory)
-  - [LICENSE](#license)
+- [Architecture](#architecture)
+  - [Object Detection](#object-detection)
+  - [Barcode Detection](#barcode-detection)
 - [CanDrink Client](#candrink-client)
   - [Getting Started](#getting-started-1)
     - [Prerequisite](#prerequisite)
     - [Installation](#installation-1)
     - [Run](#run-1)
-  - [LICENSE](#license-1)
 - [Crawler](#crawler)
   - [Getting Started](#getting-started-2)
     - [Installation](#installation-2)
     - [Run](#run-2)
-  - [LICENSE](#license-2)
 - [ML Notebook](#ml-notebook)
   - [Environment](#environment)
   - [Setup CUDA](#setup-cuda)
@@ -83,9 +93,18 @@ app
 ├─ run.py
 ```
 
-## LICENSE
+<br><br>
 
-[MIT License](./LICENSE)
+# Architecture
+
+## Object Detection
+Object detection is run with TensorFlow Lite. Model files will be distributed with constant updates. Therefore, we added deploy server for model file distribution. Client checks model is updated and download from server.
+
+![architecture-about-object-detection](./resources/architecture-about-object-detection.png)
+
+## Barcode Detection
+
+![architecture-about-barcode-detection](./resources/architecture-about-barcode-detection.png)
 
 <br><br>
 
@@ -115,10 +134,6 @@ And you can see VSCode with this project.
 
 Press `F5` to run on VSCode.
 
-## LICENSE
-
-[MIT License](./LICENSE)
-
 <br><br>
 
 # Crawler
@@ -145,10 +160,6 @@ echo "NAME=[forlder name]" >> .env
 ```
 python crawler.py
 ```
-
-## LICENSE
-
-[MIT License](./LICENSE)
 
 <br><br>
 
