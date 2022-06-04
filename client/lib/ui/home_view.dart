@@ -58,12 +58,12 @@ class _HomeViewState extends State<HomeView> {
       speech = '음료의 종류가 많습니다';
     }
 
+    // 사용자가 말하는 중에는 TTS 멈추기
+    if (isYouSpeaking) return;
+
     setState(() {
       lastAISpeech = speech;
     });
-
-    // 사용자가 말하는 중에는 TTS 멈추기
-    if (isYouSpeaking) return;
 
     if (speech.isNotEmpty) {
       if (lastAISpeech == speech) {
