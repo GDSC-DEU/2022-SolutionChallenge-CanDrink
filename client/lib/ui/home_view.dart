@@ -26,9 +26,11 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
+  bool speaking = false;
+  String previousSpeech = '';
   List<Recognition> recognitions = [];
 
-  void onRecognized(List<Recognition> recognitions) {
+  void onRecognized(List<Recognition> recognitions) async {
     setState(() {
       this.recognitions = recognitions;
     });
@@ -36,18 +38,28 @@ class _HomeViewState extends State<HomeView> {
 
     print('RECOGNITIONS (${this.recognitions.length}) ====> ${this.recognitions.map((recognition) => recognition.label).join(", ")}');
 
+    if (speaking) return;
+    speaking = true;
+
     // 중복된 제품은 제거
     final products = this.recognitions.map((recognition) => recognition.label).toSet().toList();
+    var speech = '';
 
     vibrateStrong();
     // 음료의 종류가 2종류 이하일 시 그대로 읽어주기
     if (products.length <= 2) {
-      widget.tts.speak(products.join(' 그리고 '));
+      speech = products.join(' 그리고 ');
     }
     // 음료의 종류가 3종류 이상일 시 많다고만 하기
     else {
-      widget.tts.speak('음료의 종류가 많습니다');
+      speech = '음료의 종류가 많습니다';
     }
+
+    if (speech.isNotEmpty && speech != previousSpeech) {
+      await widget.tts.speak(speech);
+      previousSpeech = speech;
+    }
+    speaking = false;
   }
 
   Widget boundingBoxes(List<Recognition> recognitions) {

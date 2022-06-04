@@ -64,8 +64,7 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
   initCamera() async {
     cameras = await availableCameras();
 
-    cameraController =
-        CameraController(cameras[0], ResolutionPreset.high, enableAudio: false);
+    cameraController = CameraController(cameras[0], ResolutionPreset.high, enableAudio: false);
     await cameraController!.initialize().then((_) async {
       await cameraController!.startImageStream(onLatestImageAvailable);
 
@@ -100,12 +99,10 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
   }
 
   Future<List<Recognition>> inferenceObjects(CameraImage cameraImage) async {
-    final isolateData = IsolateData(
-        cameraImage, classifier.interpreter!.address, classifier.labels!);
+    final isolateData = IsolateData(cameraImage, classifier.interpreter!.address, classifier.labels!);
     ReceivePort responsePort = ReceivePort();
 
-    isolateUtils.sendPort
-        .send(isolateData..responsePort = responsePort.sendPort);
+    isolateUtils.sendPort.send(isolateData..responsePort = responsePort.sendPort);
     final recognitions = (await responsePort.first) as List<Recognition>;
     return recognitions;
   }
@@ -113,8 +110,11 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
   Future<List<Recognition>> inferenceBarcodes(CameraImage cameraImage) async {
     final barcodes = await scanBarcodes(cameraImage);
     if (barcodes.isNotEmpty) {
-      final productName =
-          await getProductNameFromBarcode(barcodes[0].value.rawValue!);
+      final barcode = barcodes[0];
+      final expiration = getExpirationFromBarcode(barcode);
+
+      final productName = (await getProductNameFromBarcode(barcode)) ?? (expiration != null ? '유통기한이 $expiration 까지 입니다' : null);
+      print('barcode(barcode: $barcode, productName: $productName, expiration: $expiration)');
       if (productName != null) {
         // Recognition, but no bounding box, no id.
         return [Recognition(id: -1, label: productName, score: 1.0)];
@@ -135,9 +135,6 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
     // the display width of image on screen is
     // same as screenWidth while maintaining the aspectRatio
     final screenSize = MediaQuery.of(context).size;
-
-    print(
-        'screenSize(width: ${screenSize.width}, height: ${screenSize.height})');
 
     CameraViewSingleton.screenSize = screenSize;
     CameraViewSingleton.ratio = screenSize.width / previewSize.height;
@@ -164,8 +161,7 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
         break;
       case AppLifecycleState.resumed:
         resumeVibrate();
-        if (cameraController != null &&
-            !cameraController!.value.isStreamingImages) {
+        if (cameraController != null && !cameraController!.value.isStreamingImages) {
           await cameraController!.startImageStream(onLatestImageAvailable);
         }
         break;
