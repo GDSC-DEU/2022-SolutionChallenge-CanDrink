@@ -29,9 +29,10 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
-  bool speaking = false;
-  bool sttSpeaking = false;
-  String previousSpeech = '';
+  int countAISpeechRepeated = 0;
+  String lastAISpeech = '';
+  bool isYouSpeaking = false;
+  String lastYouSpeech = '';
   List<Recognition> recognitions = [];
 
   void onRecognized(List<Recognition> recognitions) async {
@@ -41,9 +42,6 @@ class _HomeViewState extends State<HomeView> {
     if (this.recognitions.isEmpty) return;
 
     print('RECOGNITIONS (${this.recognitions.length}) ====> ${this.recognitions.map((recognition) => recognition.label).join(", ")}');
-
-    if (speaking) return;
-    speaking = true;
 
     // 중복된 제품은 제거
     final products = this.recognitions.map((recognition) => recognition.label).toSet().toList();
@@ -60,10 +58,18 @@ class _HomeViewState extends State<HomeView> {
     }
 
     if (speech.isNotEmpty) {
+      if (lastAISpeech == speech) {
+        countAISpeechRepeated++;
+        if (countAISpeechRepeated < 3) {
+          return;
+        }
+      }
+      countAISpeechRepeated = 0;
       await widget.tts.speak(speech);
-      previousSpeech = speech;
+      setState(() {
+        lastAISpeech = speech;
+      });
     }
-    speaking = false;
   }
 
   Widget boundingBoxes(List<Recognition> recognitions) {
@@ -77,51 +83,75 @@ class _HomeViewState extends State<HomeView> {
 
   onSpeechResult(SpeechRecognitionResult result) async {
     var _lastWord = result.recognizedWords;
-
+    print(result.recognizedWords);
     if (_lastWord != "") {
       print("STT Result : " + _lastWord);
+      setState(() {
+        lastYouSpeech = _lastWord;
+      });
       for (var recognition in recognitions) {
-        if (_lastWord != "" && recognition.label.contains(_lastWord) && !sttSpeaking) {
-          sttSpeaking = true;
-          widget.tts.speak("${recognition.label}가 있습니다.");
+        if (_lastWord != "" && recognition.label.contains(_lastWord) && !isYouSpeaking) {
+          setState(() {
+            lastAISpeech = "${recognition.label}가 있습니다.";
+          });
+          widget.tts.speak(lastAISpeech);
           await widget.stt.stopListening();
           break;
         }
       }
-      sttSpeaking = false;
       _lastWord = "";
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    Size screenSize = MediaQuery.of(context).size;
-
     return Scaffold(
       body: GestureDetector(
-        onLongPressStart: (details) async {
-          speaking = true;
+        onTapDown: (details) async {
           await widget.stt.startingListening(onSpeechResult);
-          vibrateStrong();
+          setState(() {
+            lastYouSpeech = '';
+            isYouSpeaking = true;
+          });
+          vibrateLong();
         },
-        onLongPressEnd: (details) async {
+        onTapUp: (details) async {
           await widget.stt.stopListening();
-          speaking = false;
+          setState(() {
+            isYouSpeaking = false;
+          });
+          vibrateWeek();
         },
         child: Stack(children: [
-          Positioned(
-            top: 0.0,
-            left: 0.0,
-            width: screenSize.width,
-            height: screenSize.height,
-            child: SizedBox(
-              height: screenSize.height,
-              child: CameraView(onRecognized: onRecognized),
-            ),
-          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                flex: 1,
+                child: Stack(children: [
+                  Positioned.fill(child: CameraView(onRecognized: onRecognized)),
 
-          // draw object's bounding boxes
-          boundingBoxes(recognitions),
+                  // draw object's bounding boxes
+                  boundingBoxes(recognitions),
+                ]),
+              ),
+              Container(
+                padding: const EdgeInsets.all(12.0),
+                child: Text(
+                  'A.I. : $lastAISpeech',
+                  style: const TextStyle(fontSize: 18),
+                ),
+              ),
+              Container(
+                color: isYouSpeaking ? Colors.green : null,
+                padding: const EdgeInsets.all(12.0),
+                child: Text(
+                  'You : ${isYouSpeaking ? '$lastYouSpeech (listening ...)'.trim() : lastYouSpeech}',
+                  style: const TextStyle(fontSize: 18),
+                ),
+              ),
+            ],
+          ),
         ]),
       ),
     );
