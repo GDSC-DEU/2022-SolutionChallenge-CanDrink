@@ -21,7 +21,7 @@ class TTSService {
     languageCode = "ko-KR";
   }
 
-  void speak(String text) {
-    tts.speak(text);
+  Future<void> speak(String text) async {
+    await tts.speak(text);
   }
 }

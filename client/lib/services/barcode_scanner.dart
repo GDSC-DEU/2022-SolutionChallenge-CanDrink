@@ -13,12 +13,33 @@ Future<String?> getProductNameFromBarcode(String barcode) async {
   try {
     var name = doc.getElementsByClassName('container')[0].getElementsByTagName('b')[0].innerHtml;
     return name;
-  } catch (e) {
-    return '상품 정보가 없습니다.';
-  }
+  } catch (e) {}
+
+  return null;
 }
 
-Future<List<Barcode>> scanBarcodes(CameraImage? cameraImage) async {
+String? getExpirationFromBarcode(String barcode) {
+  final regex = RegExp(r'^\d{13}(\d{1})(\d{2})(\d{2})$');
+  final match = regex.firstMatch(barcode);
+  if (match == null) return null;
+
+  final values = match.groups([1, 2, 3]);
+  final digit = int.parse(values[0]!);
+  final time1 = int.parse(values[1]!);
+  final time2 = int.parse(values[2]!);
+
+  switch (digit) {
+    case 1: // GS25 DDMM
+      return '$time2월 $time1일';
+    case 2: // GS25 HHDD
+      return '$time2일 $time1시';
+    case 4: // CU DDHH
+      return '$time1일 $time2시';
+  }
+  return null;
+}
+
+Future<List<String>> scanBarcodes(CameraImage? cameraImage) async {
   final WriteBuffer allBytes = WriteBuffer();
 
   for (Plane plane in cameraImage!.planes) {
@@ -54,7 +75,8 @@ Future<List<Barcode>> scanBarcodes(CameraImage? cameraImage) async {
 
   final barcodeScanner = GoogleMlKit.vision.barcodeScanner();
 
-  final List<Barcode> barcodes = await barcodeScanner.processImage(inputImage);
+  final List<String> barcodes =
+      (await barcodeScanner.processImage(inputImage)).map((barcode) => barcode.value.rawValue).whereType<String>().toList();
 
   return barcodes;
 }
