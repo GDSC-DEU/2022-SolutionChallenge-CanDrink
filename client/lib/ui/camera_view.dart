@@ -4,6 +4,7 @@ import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:camera/camera.dart';
 import 'package:candrink/services/asset_download.dart';
 import 'package:candrink/services/barcode_scanner.dart';
+import 'package:candrink/services/stt_service.dart';
 import 'package:candrink/services/tflite/classifier.dart';
 import 'package:candrink/services/tflite/recognition.dart';
 import 'package:candrink/services/tts_service.dart';
@@ -30,10 +31,10 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
 
   bool cameraOccupied = false;
 
+  final stt = STTService();
   final tts = TTSService();
   final assetsAudioPlayer = AssetsAudioPlayer();
   final assetDownloader = AssetDownloader();
-
   _CameraViewState();
 
   @override
@@ -51,6 +52,8 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
     classifier = Classifier();
 
     await initCamera();
+
+    await stt.initSpeech();
 
     // all ready! play initialize sound to notify user
     assetsAudioPlayer.open(Audio("assets/sound/beep.mp3"));

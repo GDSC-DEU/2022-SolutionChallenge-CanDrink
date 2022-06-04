@@ -1,13 +1,16 @@
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:candrink/services/asset_download.dart';
+import 'package:candrink/services/stt_service.dart';
 import 'package:candrink/services/tflite/recognition.dart';
 import 'package:candrink/services/tts_service.dart';
 import 'package:candrink/ui/bounding_box.dart';
 import 'package:candrink/ui/camera_view.dart';
 import 'package:candrink/utils/vibration.dart';
 import 'package:flutter/material.dart';
+import 'package:speech_to_text/speech_recognition_result.dart';
 
 class HomeView extends StatefulWidget {
+  final stt = STTService();
   final tts = TTSService();
   final assetsAudioPlayer = AssetsAudioPlayer();
   final assetDownloader = AssetDownloader();
@@ -27,6 +30,7 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   bool speaking = false;
+  bool sttSpeaking = false;
   String previousSpeech = '';
   List<Recognition> recognitions = [];
 
@@ -71,26 +75,55 @@ class _HomeViewState extends State<HomeView> {
     );
   }
 
+  onSpeechResult(SpeechRecognitionResult result) async {
+    var _lastWord = result.recognizedWords;
+
+    if (_lastWord != "") {
+      print("STT Result : " + _lastWord);
+      for (var recognition in recognitions) {
+        if (_lastWord != "" && recognition.label.contains(_lastWord) && !sttSpeaking) {
+          sttSpeaking = true;
+          widget.tts.speak("${recognition.label}가 있습니다.");
+          await widget.stt.stopListening();
+          break;
+        }
+      }
+      sttSpeaking = false;
+      _lastWord = "";
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     Size screenSize = MediaQuery.of(context).size;
 
     return Scaffold(
-      body: Stack(children: [
-        Positioned(
-          top: 0.0,
-          left: 0.0,
-          width: screenSize.width,
-          height: screenSize.height,
-          child: SizedBox(
+      body: GestureDetector(
+        onLongPressStart: (details) async {
+          speaking = true;
+          await widget.stt.startingListening(onSpeechResult);
+          vibrateStrong();
+        },
+        onLongPressEnd: (details) async {
+          await widget.stt.stopListening();
+          speaking = false;
+        },
+        child: Stack(children: [
+          Positioned(
+            top: 0.0,
+            left: 0.0,
+            width: screenSize.width,
             height: screenSize.height,
-            child: CameraView(onRecognized: onRecognized),
+            child: SizedBox(
+              height: screenSize.height,
+              child: CameraView(onRecognized: onRecognized),
+            ),
           ),
-        ),
 
-        // draw object's bounding boxes
-        boundingBoxes(recognitions),
-      ]),
+          // draw object's bounding boxes
+          boundingBoxes(recognitions),
+        ]),
+      ),
     );
   }
 }
