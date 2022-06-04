@@ -1,4 +1,4 @@
-<center>
+<div align="center">
 
 <img src="./resources/candrink.png" width="200" height="200">
 
@@ -7,7 +7,7 @@
 
 We are aim to a world where blind people have free from the inconvinience of failure of recognizing cans.
 
-</center>
+</div>
 
 <br>
 <br>
