@@ -24,4 +24,8 @@ class TTSService {
   Future<void> speak(String text) async {
     await tts.speak(text);
   }
+
+  Future <void> stop() async {
+    await tts.stop();
+  }
 }
