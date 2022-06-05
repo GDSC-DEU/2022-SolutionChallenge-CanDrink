@@ -5,7 +5,7 @@
 <!-- omit in toc -->
 # 2022-SolutionChallenge-CanDrink
 
-We are aim to a world where blind people have free from the inconvinience of failure of recognizing cans.
+We are aim to a world where visually impaired are able to choice and enjoy drink what they want.
 
 </div>
 
@@ -14,7 +14,9 @@ We are aim to a world where blind people have free from the inconvinience of fai
 
 ## Summary
 
-Of the many canned drinks, there are only two types of drinks that can be classified in braille: 'just drink' and 'soda'. This is what canned drinks look like from a blind person's point of view. So we created a service that helps visually impaired people choose their favorite drinks.
+Of the many canned drinks, there are only two types of drinks that can be classified in braille: 'just drink' and 'soda'. This is what canned drinks look like from a visually impaired's point of view. So we created a service that helps visually impaired people choose their favorite drinks.
+
+With **CanDrink**, visually impaired can get free of the inconvenience of failure of recognizing cans 
 
 You can see more detail on **[Intoduction YouTube Link](https://www.youtube.com/embed/zg14ulTd5mM)**!
 
@@ -32,6 +34,7 @@ Click image to see more detail!
 <!-- omit in toc -->
 # Table of Contents
 
+- [Features](#features)
 - [CanDrink Server](#candrink-server)
   - [Getting Started](#getting-started)
     - [Installation](#installation)
@@ -56,6 +59,13 @@ Click image to see more detail!
     - [Install CUDA 11.2](#install-cuda-112)
     - [Install cuDNN 8.1.0](#install-cudnn-810)
     - [Verify Installation](#verify-installation)
+
+<br><br>
+
+# Features
+1. Find out the brand
+2. Search the drink
+3. Check the expiration date
 
 <br><br>
 
