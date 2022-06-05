@@ -8,12 +8,12 @@ import 'package:tflite_flutter/tflite_flutter.dart';
 import 'package:tflite_flutter_helper/tflite_flutter_helper.dart';
 
 class Classifier {
-  static const MODEL_FILENAME = 'tflite/converted_model-640-fp16-small-v1.tflite';
+  static const MODEL_FILENAME = 'tflite/candrink-v4-640-f32-large.tflite';
   static const LABELS_FILENAME = 'assets/tflite/labels.txt';
 
   /// Input size of image (height = width = 640)
   static const INPUT_SIZE = 640;
-  static const THRESHOLD = 0.8;
+  static const THRESHOLD = 0.5;
 
   // Number of results to show
   static const int NUM_RESULTS = 10;
@@ -45,7 +45,7 @@ class Classifier {
     this.interpreter = interpreter ??
         await Interpreter.fromAsset(
           MODEL_FILENAME,
-          options: InterpreterOptions()..threads = 4,
+          options: InterpreterOptions()..threads = 8,
         );
 
     _outputShapes = this.interpreter!.getOutputTensors().map((tensor) => tensor.shape).toList();
