@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:candrink/services/tflite/stats.dart';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as imageLib;
 import 'package:candrink/services/tflite/recognition.dart';
@@ -76,11 +77,19 @@ class Classifier {
     return normalizedTensorBuffer;
   }
 
-  List<Recognition> predict(imageLib.Image image) {
-    if (!ready) return [];
+  PredictResult? predict(imageLib.Image image) {
+    if (!ready) return null;
 
+    final stats = Stats();
+
+    stats.startPredict();
+
+    // <-- Do PreProcess
+    stats.startPreProcess();
     final resizedImage = resizeImage(TensorImage.fromImage(image));
     final normalizedTensorBuffer = tensorBufferedImage(resizedImage);
+    stats.finishPreProcess();
+    // End PreProces -->
 
     final inputs = [normalizedTensorBuffer.buffer];
 
@@ -90,7 +99,12 @@ class Classifier {
       0: outputLocations.buffer,
     };
 
+    // <-- Do Inference
+    stats.startInference();
     interpreter!.runForMultipleInputs(inputs, outputs);
+    stats.finishInference();
+    // End Inference -->
+
     final results = outputLocations.getDoubleList();
     final recognitions = <Recognition>[];
 
@@ -125,6 +139,19 @@ class Classifier {
     }
 
     recognitions.sort(((a, b) => b.score.compareTo(a.score)));
-    return recognitions.take(NUM_RESULTS).toList();
+
+    stats.finishPredict();
+
+    return PredictResult(
+      recognitions: recognitions.take(NUM_RESULTS).toList(),
+      stats: stats,
+    );
   }
+}
+
+class PredictResult {
+  final List<Recognition> recognitions;
+  final Stats stats;
+
+  PredictResult({required this.recognitions, required this.stats});
 }
