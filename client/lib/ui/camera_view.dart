@@ -7,6 +7,7 @@ import 'package:candrink/services/barcode_scanner.dart';
 import 'package:candrink/services/stt_service.dart';
 import 'package:candrink/services/tflite/classifier.dart';
 import 'package:candrink/services/tflite/recognition.dart';
+import 'package:candrink/services/tflite/stats.dart';
 import 'package:candrink/services/tts_service.dart';
 import 'package:candrink/ui/camera_view_singleton.dart';
 import 'package:candrink/utils/isolate_utils.dart';
@@ -14,7 +15,7 @@ import 'package:candrink/utils/vibration.dart';
 import 'package:flutter/material.dart';
 
 class CameraView extends StatefulWidget {
-  final Function(List<Recognition> recognitions) onRecognized;
+  final Function(List<Recognition> recognitions, Stats stats) onRecognized;
 
   @override
   _CameraViewState createState() => _CameraViewState();
@@ -67,7 +68,7 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
   initCamera() async {
     cameras = await availableCameras();
 
-    cameraController = CameraController(cameras[0], ResolutionPreset.high, enableAudio: false);
+    cameraController = CameraController(cameras[0], ResolutionPreset.low, enableAudio: false);
     await cameraController!.initialize().then((_) async {
       await cameraController!.startImageStream(onLatestImageAvailable);
 
@@ -85,15 +86,20 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
       cameraOccupied = true;
     });
 
+    late Stats stats;
+
     // do 2 inference job simultaneously
     List<List<Recognition>> results = await Future.wait<List<Recognition>>([
-      inferenceObjects(cameraImage),
-      inferenceBarcodes(cameraImage),
+      inferenceObjects(cameraImage).then((result) {
+        stats = result.stats;
+        return result.recognitions;
+      }),
+      inferenceBarcodes(cameraImage).then((productName) => productName == null ? [] : [Recognition(id: 0, label: productName, score: 1.0)]),
     ]);
 
     // flatten 2 results
     final recognitions = results.expand((i) => i).toList();
-    widget.onRecognized(recognitions);
+    widget.onRecognized(recognitions, stats);
 
     await Future.delayed(const Duration(milliseconds: 100));
     setState(() {
@@ -101,16 +107,16 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
     });
   }
 
-  Future<List<Recognition>> inferenceObjects(CameraImage cameraImage) async {
+  Future<PredictResult> inferenceObjects(CameraImage cameraImage) async {
     final isolateData = IsolateData(cameraImage, classifier.interpreter!.address, classifier.labels!);
     ReceivePort responsePort = ReceivePort();
 
     isolateUtils.sendPort.send(isolateData..responsePort = responsePort.sendPort);
-    final recognitions = (await responsePort.first) as List<Recognition>;
-    return recognitions;
+    final result = (await responsePort.first) as PredictResult;
+    return result;
   }
 
-  Future<List<Recognition>> inferenceBarcodes(CameraImage cameraImage) async {
+  Future<String?> inferenceBarcodes(CameraImage cameraImage) async {
     final barcodes = await scanBarcodes(cameraImage);
     if (barcodes.isNotEmpty) {
       final barcode = barcodes[0];
@@ -120,10 +126,10 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
       print('barcode(barcode: $barcode, productName: $productName, expiration: $expiration)');
       if (productName != null) {
         // Recognition, but no bounding box, no id.
-        return [Recognition(id: -1, label: productName, score: 1.0)];
+        return productName;
       }
     }
-    return [];
+    return null;
   }
 
   void determineCameraPreviewActualSize() {

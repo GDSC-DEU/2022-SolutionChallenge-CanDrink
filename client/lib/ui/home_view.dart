@@ -2,6 +2,7 @@ import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:candrink/services/asset_download.dart';
 import 'package:candrink/services/stt_service.dart';
 import 'package:candrink/services/tflite/recognition.dart';
+import 'package:candrink/services/tflite/stats.dart';
 import 'package:candrink/services/tts_service.dart';
 import 'package:candrink/ui/bounding_box.dart';
 import 'package:candrink/ui/camera_view.dart';
@@ -29,15 +30,24 @@ class HomeView extends StatefulWidget {
 }
 
 class _HomeViewState extends State<HomeView> {
+  // About A.I. Speaking
   int countAISpeechRepeated = 0;
   String lastAISpeech = '';
+
+  // About User Speaking
   bool isYouSpeaking = false;
   String lastYouSpeech = '';
+
+  // Save current recognitions
   List<Recognition> recognitions = [];
 
-  void onRecognized(List<Recognition> recognitions) async {
+  // Predict Stats
+  Stats? stats = null;
+
+  void onRecognized(List<Recognition> recognitions, Stats stats) async {
     setState(() {
       this.recognitions = recognitions;
+      this.stats = stats;
     });
     if (this.recognitions.isEmpty) return;
 
@@ -61,20 +71,25 @@ class _HomeViewState extends State<HomeView> {
     // 사용자가 말하는 중에는 TTS 멈추기
     if (isYouSpeaking) return;
 
-    setState(() {
-      lastAISpeech = speech;
-    });
+    var isSpeechRepeating = false;
 
     if (speech.isNotEmpty) {
       if (lastAISpeech == speech) {
         countAISpeechRepeated++;
         if (countAISpeechRepeated < 2) {
-          return;
+          isSpeechRepeating = true;
         }
       }
-      countAISpeechRepeated = 0;
-      await widget.tts.speak(speech);
+
+      if (!isSpeechRepeating) {
+        countAISpeechRepeated = 0;
+        await widget.tts.speak(speech);
+      }
     }
+
+    setState(() {
+      lastAISpeech = speech;
+    });
   }
 
   Widget boundingBoxes(List<Recognition> recognitions) {
@@ -141,6 +156,14 @@ class _HomeViewState extends State<HomeView> {
                   boundingBoxes(recognitions),
                 ]),
               ),
+              Container(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Text(
+                    stats == null
+                        ? ''
+                        : 'Total Pred: ${stats!.totalPredictTime}ms   Inference: ${stats!.inferenceTime}ms   PreProcess: ${stats!.preProcessingTime}ms',
+                    style: const TextStyle(fontSize: 12),
+                  )),
               Container(
                 padding: const EdgeInsets.all(12.0),
                 child: Text(
