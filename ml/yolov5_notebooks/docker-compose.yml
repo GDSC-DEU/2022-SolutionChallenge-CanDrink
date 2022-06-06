@@ -1,0 +1,11 @@
+version: "3.7"
+services:  
+  cdn:
+    container_name: cdn
+    image: nginx
+    restart: unless-stopped
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./share:/share
+    ports:
+      - 80:80
