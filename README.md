@@ -18,7 +18,9 @@ Of the many canned drinks, there are only two types of drinks that can be classi
 
 With **CanDrink**, visually impaired can get free of the inconvenience of failure of recognizing cans 
 
-You can see more detail on **[Intoduction YouTube Link](https://www.youtube.com/embed/zg14ulTd5mM)**!
+You can see more detail on YouYube!
+
+[![youtube-thumbnail](./resources/youtube-thumbnail.png)](https://youtu.be/V43GEDoik8s)
 
 <br><br>
 
